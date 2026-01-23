@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "69258847708",
+    "project_id": "mof-demo-push-message",
+    "storage_bucket": "mof-demo-push-message.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69258847708:android:776cae9b57ffdedd6bdb19",
+        "android_client_info": {
+          "package_name": "com.mofdemo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTjUmCYNsTIvHkcTKJqIvpNzrTBSYOODw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
