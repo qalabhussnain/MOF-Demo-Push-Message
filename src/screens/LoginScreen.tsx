@@ -7,8 +7,11 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+import {registerDeviceMapping} from '../api/adsPassDevices';
+import {saveAuth} from '../storage/auth';
 
 interface LoginScreenProps {
   navigation: any;
@@ -36,6 +39,35 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       // Get FCM token (silently in background)
       const fcmToken = await messaging().getToken();
       console.log('FCM Token:', fcmToken);
+
+      // ADSPass placeholder call (non-blocking for demo):
+      // NOTE: Replace `userId` and `deviceUuid` with real values from your auth/device layer.
+      try {
+        const platform = Platform.OS === 'android' ? 'Android' : 'iOS';
+        const deviceUuid = `device-${fcmToken.slice(0, 12)}`;
+        const userId = 0;
+
+        await registerDeviceMapping({
+          userId,
+          deviceUuid,
+          deviceToken: fcmToken,
+          platform,
+        });
+
+        // Store credentials + device info in AsyncStorage
+        try {
+          await saveAuth({
+            email: email.trim(),
+            password: password.trim(),
+            userId,
+            deviceUuid,
+          });
+        } catch (storageError) {
+          console.warn('Failed to save auth data:', storageError);
+        }
+      } catch {
+        // Swallow errors: user login should not be blocked by device mapping in this demo app.
+      }
 
       // Navigate to Home screen with user email
       navigation.replace('Home', {email: email.trim()});

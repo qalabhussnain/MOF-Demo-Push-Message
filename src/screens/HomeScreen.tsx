@@ -1,5 +1,7 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {unregisterDeviceMapping} from '../api/adsPassDevices';
+import {clearSavedAuth, getSavedAuth} from '../storage/auth';
 
 interface HomeScreenProps {
   route: {
@@ -7,10 +9,32 @@ interface HomeScreenProps {
       email?: string;
     };
   };
+  navigation: any;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({route}) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({route, navigation}) => {
   const userEmail = route.params?.email || 'User';
+
+  const handleLogout = async () => {
+    try {
+      const saved = await getSavedAuth();
+      if (saved) {
+        try {
+          await unregisterDeviceMapping({
+            userId: saved.userId,
+            deviceUuid: saved.deviceUuid,
+          });
+        } catch (apiError) {
+          console.warn('Failed to unregister device mapping:', apiError);
+        }
+        await clearSavedAuth();
+      }
+    } catch (storageError) {
+      console.warn('Failed to clear auth data:', storageError);
+    } finally {
+      navigation.replace('Login');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -30,6 +54,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({route}) => {
             This screen keeps the app active and ready to receive notifications.
           </Text>
         </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -96,6 +124,18 @@ const styles = StyleSheet.create({
     color: '#555',
     lineHeight: 20,
     textAlign: 'center',
+  },
+  logoutButton: {
+    marginTop: 32,
+    backgroundColor: '#d32f2f',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
